@@ -1,0 +1,6 @@
+subscriptions:
+- topic: git-trigger
+  path: /some-checkout-dir
+  tasks:
+  - cmd: git pull
+  - cmd: make
