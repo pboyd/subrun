@@ -1,6 +1,9 @@
 subscriptions:
-- topic: git-trigger
-  path: /some-checkout-dir
+- name: build
+  dir: /some-checkout-dir
+  trigger:
+    pubsub:
+      topic: git-trigger
   tasks:
   - cmd: git pull
   - cmd: make
