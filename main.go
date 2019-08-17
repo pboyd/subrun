@@ -24,5 +24,10 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%s: %v\n", configPath, err)
 		os.Exit(2)
 	}
+
+	for _, sub := range config.Subscriptions {
+		_ = sub
+	}
+
 	spew.Dump(config)
 }

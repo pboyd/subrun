@@ -3,6 +3,7 @@ subscriptions:
   dir: /some-checkout-dir
   trigger:
     pubsub:
+      project: some-project-name
       topic: git-trigger
   tasks:
   - cmd: git pull

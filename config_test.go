@@ -19,6 +19,7 @@ subscriptions:
   dir: /some-checkout-dir
   trigger:
     pubsub:
+      project: some-project
       topic: git-trigger
   tasks:
   - cmd: git pull
@@ -31,7 +32,8 @@ subscriptions:
 						Dir:  "/some-checkout-dir",
 						Trigger: &ConfigTrigger{
 							PubSub: &PubSubTrigger{
-								Topic: "git-trigger",
+								Project: "some-project",
+								Topic:   "git-trigger",
 							},
 						},
 						Tasks: []ConfigTask{
@@ -92,7 +94,26 @@ subscriptions:
 - name: foo
   trigger:
     pubsub:
+      project: bar`,
+			err: `subscription "foo": pubsub trigger is missing topic`,
+		},
+		{
+			doc: `
+subscriptions:
+- name: foo
+  trigger:
+    pubsub:
       topic: bar`,
+			err: `subscription "foo": pubsub trigger is missing project`,
+		},
+		{
+			doc: `
+subscriptions:
+- name: foo
+  trigger:
+    pubsub:
+      project: bar
+      topic: baz`,
 			err: `subscription "foo": no tasks`,
 		},
 		{
@@ -101,7 +122,8 @@ subscriptions:
 - name: foo
   trigger:
     pubsub:
-      topic: bar
+      project: bar
+      topic: baz
   tasks:
   - foo: bar`,
 			err: `subscription "foo": task 0: no command`,
@@ -112,7 +134,8 @@ subscriptions:
 - name: foo
   trigger:
     pubsub:
-      topic: bar
+      project: bar
+      topic: baz
   tasks:
   - cmd: ls`,
 			err: `<nil>`,

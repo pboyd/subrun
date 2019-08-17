@@ -38,6 +38,10 @@ func (c *Config) Check() error {
 			return fmt.Errorf("subscription %q: pubsub trigger is missing topic", name)
 		}
 
+		if sub.Trigger.PubSub.Project == "" {
+			return fmt.Errorf("subscription %q: pubsub trigger is missing project", name)
+		}
+
 		if len(sub.Tasks) == 0 {
 			return fmt.Errorf("subscription %q: no tasks", name)
 		}
@@ -64,7 +68,10 @@ type ConfigTrigger struct {
 }
 
 type PubSubTrigger struct {
-	Topic string `yaml:"topic"`
+	Project         string `yaml:"project"`
+	Topic           string `yaml:"topic"`
+	Endpoint        string `yaml:"endpoint"`
+	CredentialsFile string `yaml:"credentialsFile"`
 }
 
 type ConfigTask struct {
