@@ -8,30 +8,23 @@ import (
 	"time"
 
 	"cloud.google.com/go/pubsub"
-	"google.golang.org/api/option"
-	"google.golang.org/grpc"
 )
 
 // These tests require the PubSub emulator: https://cloud.google.com/pubsub/docs/emulator
 
 var pubSubFakeAddress = os.Getenv("PUBSUB_EMULATOR_HOST")
 
-func testPubSubClient(ctx context.Context, t *testing.T, project string) *pubsub.Client {
+func testPubSubClient(ctx context.Context, t *testing.T, project string) (*pubsub.Client, TriggerOpts) {
 	if pubSubFakeAddress == "" {
 		t.Skipf("Skipping. Set PUBSUB_EMULATOR_HOST=localhost:8085 to run")
 	}
 
-	grpcConn, err := grpc.Dial(pubSubFakeAddress, grpc.WithInsecure())
-	if err != nil {
-		t.Fatalf("error dialing GRPC: %v", err)
-	}
-
-	client, err := pubsub.NewClient(ctx, project, option.WithGRPCConn(grpcConn))
+	opts, err := PubSubEmulatorOpts(ctx, pubSubFakeAddress, project)
 	if err != nil {
 		t.Fatalf("error creating client: %v", err)
 	}
 
-	return client
+	return opts.ClientOverride, opts
 }
 
 func testCreateTopic(ctx context.Context, t *testing.T, client *pubsub.Client, id string) *pubsub.Topic {
@@ -63,12 +56,10 @@ func TestTrigger(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client := testPubSubClient(ctx, t, projectName)
+	client, opts := testPubSubClient(ctx, t, projectName)
 	topic := testCreateTopic(ctx, t, client, topicName)
 
-	trigger, err := NewTrigger(subrunID, projectName, topicName, TriggerOpts{
-		ClientOverride: client,
-	})
+	trigger, err := NewTrigger(subrunID, projectName, topicName, opts)
 	if err != nil {
 		t.Fatalf("error starting trigger: %v", err)
 	}

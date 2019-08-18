@@ -8,22 +8,8 @@ import (
 
 	"cloud.google.com/go/pubsub"
 	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 )
-
-type TriggerOpts struct {
-	CredentialsFile string
-	ClientOverride  *pubsub.Client
-}
-
-func (o TriggerOpts) clientOpts() []option.ClientOption {
-	opts := []option.ClientOption{}
-
-	if o.CredentialsFile != "" {
-		opts = append(opts, option.WithCredentialsFile(o.CredentialsFile))
-	}
-
-	return opts
-}
 
 type Trigger struct {
 	ctx    context.Context
@@ -126,4 +112,35 @@ func (t *Trigger) processMessage(id string, msg *pubsub.Message) {
 	case <-t.ctx.Done():
 	case t.out <- tMsg:
 	}
+}
+
+type TriggerOpts struct {
+	CredentialsFile string
+	ClientOverride  *pubsub.Client
+}
+
+func (o TriggerOpts) clientOpts() []option.ClientOption {
+	opts := []option.ClientOption{}
+
+	if o.CredentialsFile != "" {
+		opts = append(opts, option.WithCredentialsFile(o.CredentialsFile))
+	}
+
+	return opts
+}
+
+func PubSubEmulatorOpts(ctx context.Context, addr, project string) (TriggerOpts, error) {
+	grpcConn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return TriggerOpts{}, err
+	}
+
+	client, err := pubsub.NewClient(ctx, project, option.WithGRPCConn(grpcConn))
+	if err != nil {
+		return TriggerOpts{}, err
+	}
+
+	return TriggerOpts{
+		ClientOverride: client,
+	}, nil
 }

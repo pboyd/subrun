@@ -1,0 +1,10 @@
+subscriptions:
+- name: example
+  dir: examples
+  trigger:
+    pubsub:
+      project: fake-project
+      topic: fake-topic-id
+  tasks:
+  - cmd: ls
+  - cmd: cat example.yaml
