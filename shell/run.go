@@ -64,9 +64,9 @@ func Run(ctx context.Context, t Task) error {
 
 	err = cmd.Run()
 	if err != nil {
-		re := &RunErr{Message: err.Error()}
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			re.ExitCode = exitErr.ProcessState.ExitCode()
+		re := &RunErr{
+			Message:  err.Error(),
+			ExitCode: extractExitCode(err),
 		}
 
 		return re
@@ -90,6 +90,8 @@ func findShell() (string, error) {
 }
 
 type RunErr struct {
+	// Process exit code. Only available in go 1.12 or later. It will
+	// always be 0 in earlier versions.
 	ExitCode int
 	Message  string
 }
